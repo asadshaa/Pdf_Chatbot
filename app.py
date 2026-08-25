@@ -228,19 +228,24 @@ def extract_pdf_documents(file_path, filename):
         ocr = get_ocr_engine()
         if ocr is not None:
             try:
+                import gc
                 doc = pymupdf.open(file_path)
                 for idx, page in enumerate(doc):
                     try:
-                        pix = page.get_pixmap(dpi=150)
+                        # Use dpi=90 to conserve memory on 512MB RAM containers
+                        pix = page.get_pixmap(dpi=90)
                         img_bytes = pix.tobytes("png")
+                        del pix
                         ocr_res, _ = ocr(img_bytes)
+                        del img_bytes
                         if ocr_res:
-                            page_text = " ".join([item[1] for item in ocr_res if item and len(item) > 1])
+                            page_text = " ".join([item[1] for item in ocr_res if item and len(item) > 1 and item[1]])
                             if page_text.strip():
                                 documents.append(Document(
                                     page_content=page_text.strip(),
                                     metadata={"source_file": filename, "page": idx}
                                 ))
+                        gc.collect()
                     except Exception as page_ocr_err:
                         print(f"OCR error on page {idx}: {page_ocr_err}")
                 doc.close()
@@ -320,6 +325,10 @@ def process_pdf(file_path, filename):
         print(f"Error processing PDF {filename}: {str(e)}")
         return False, f"Error processing PDF: {str(e)}", 0, 0
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -368,9 +377,10 @@ def upload_file():
         file_size_bytes = os.path.getsize(file_path)
         file_size_str = format_file_size(file_size_bytes)
         
-        # If file was previously registered, remove old entry and rebuild vector store
-        current_files = [f for f in current_files if f['name'] != safe_name]
-        rebuild_vector_store()
+        # Only rebuild vector store if overwriting an existing document
+        if any(f['name'] == safe_name for f in current_files):
+            current_files = [f for f in current_files if f['name'] != safe_name]
+            rebuild_vector_store()
         
         # Process newly saved PDF
         success, message, pages_count, chunks_count = process_pdf(file_path, safe_name)
