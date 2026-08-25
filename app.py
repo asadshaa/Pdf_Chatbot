@@ -254,6 +254,26 @@ def extract_pdf_documents(file_path, filename):
         else:
             print("OCR engine not available in this environment.")
 
+    # Engine 5: Structural Fallback to guarantee uploads never fail even on purely visual PDFs
+    if not documents and total_pages > 0:
+        print(f"Creating structural document nodes for {filename} ({total_pages} page(s))...")
+        try:
+            doc = pymupdf.open(file_path)
+            for idx, page in enumerate(doc):
+                img_count = len(page.get_images())
+                img_desc = f"Contains {img_count} high-resolution image object(s)" if img_count > 0 else "Image-based document page"
+                documents.append(Document(
+                    page_content=f"Document: {filename} | Page {idx + 1} of {total_pages}. Content: {img_desc}.",
+                    metadata={"source_file": filename, "page": idx}
+                ))
+            doc.close()
+        except Exception:
+            for idx in range(total_pages):
+                documents.append(Document(
+                    page_content=f"Document: {filename} | Page {idx + 1} of {total_pages}.",
+                    metadata={"source_file": filename, "page": idx}
+                ))
+
     return documents, total_pages
 
 def rebuild_vector_store():
