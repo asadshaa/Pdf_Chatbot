@@ -11,7 +11,13 @@ from dotenv import load_dotenv
 # Multi-engine PDF and OCR
 import pymupdf
 import pdfplumber
-from rapidocr_onnxruntime import RapidOCR
+
+try:
+    from rapidocr_onnxruntime import RapidOCR
+    HAS_RAPIDOCR = True
+except Exception:
+    RapidOCR = None
+    HAS_RAPIDOCR = False
 
 # LangChain imports
 from langchain_groq import ChatGroq
@@ -95,8 +101,14 @@ def get_embeddings():
 _ocr_engine = None
 def get_ocr_engine():
     global _ocr_engine
+    if not HAS_RAPIDOCR or RapidOCR is None:
+        return None
     if _ocr_engine is None:
-        _ocr_engine = RapidOCR()
+        try:
+            _ocr_engine = RapidOCR()
+        except Exception as e:
+            print(f"Could not load RapidOCR: {e}")
+            _ocr_engine = None
     return _ocr_engine
 
 def get_groq_api_key():
