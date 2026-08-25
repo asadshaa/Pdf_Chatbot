@@ -113,6 +113,19 @@ def get_ocr_engine():
             _ocr_engine = None
     return _ocr_engine
 
+# Default & Active Models
+DEFAULT_MODEL = "gemini-2.0-flash"
+FALLBACK_ACTIVE_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "llama-3.3-70b-versatile",
+    "groq/compound-mini",
+    "groq/compound",
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.6-27b"
+]
+
 def get_groq_api_key():
     load_dotenv(override=True)
     key = os.getenv("GROQ_API_KEY", "").strip().strip('"').strip("'")
@@ -120,30 +133,45 @@ def get_groq_api_key():
         return None
     return key
 
+def get_gemini_api_key():
+    load_dotenv(override=True)
+    key = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
+    key = key.strip().strip('"').strip("'")
+    if not key or key.startswith("your_") or key == "AIzaSy_placeholder":
+        return None
+    return key
+
 def get_available_models():
-    """Queries Groq API dynamically for active models on the user's account."""
+    """Returns active Google Gemini and Groq models."""
+    models = [
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro"
+    ]
     groq_key = get_groq_api_key()
-    if not groq_key:
-        return FALLBACK_ACTIVE_MODELS
-    try:
-        from groq import Groq
-        client = Groq(api_key=groq_key)
-        all_models = client.models.list().data
-        active = []
-        for m in all_models:
-            mid = m.id
-            if any(skip in mid for skip in ['whisper', 'prompt-guard', 'safeguard', 'orpheus', 'allam']):
-                continue
-            active.append(mid)
-        if active:
-            return active
-    except Exception as e:
-        print("Error fetching dynamic models list:", e)
-        
-    return FALLBACK_ACTIVE_MODELS
+    if groq_key:
+        try:
+            from groq import Groq
+            client = Groq(api_key=groq_key)
+            all_models = client.models.list().data
+            for m in all_models:
+                mid = m.id
+                if any(skip in mid for skip in ['whisper', 'prompt-guard', 'safeguard', 'orpheus', 'allam']):
+                    continue
+                if mid not in models:
+                    models.append(mid)
+        except Exception:
+            for m in ["llama-3.3-70b-versatile", "groq/compound-mini", "groq/compound", "openai/gpt-oss-120b", "qwen/qwen3.6-27b"]:
+                if m not in models:
+                    models.append(m)
+    else:
+        for m in ["llama-3.3-70b-versatile", "groq/compound-mini", "groq/compound", "openai/gpt-oss-120b"]:
+            if m not in models:
+                models.append(m)
+    return models
 
 def get_current_model():
-    model = os.getenv("GROQ_MODEL", DEFAULT_MODEL)
+    model = os.getenv("ACTIVE_MODEL") or os.getenv("GROQ_MODEL") or DEFAULT_MODEL
     if any(dep in model for dep in ['gemma2', 'llama3-70b-8192', 'llama3-8b-8192', 'mixtral']):
         return DEFAULT_MODEL
     return model
@@ -359,6 +387,7 @@ def index():
 def status():
     global current_files, history
     groq_key = get_groq_api_key()
+    gemini_key = get_gemini_api_key()
     _, emb_name = get_embeddings()
     available_models = get_available_models()
     
@@ -366,7 +395,9 @@ def status():
         'has_file': len(current_files) > 0,
         'files': current_files,
         'total_files': len(current_files),
-        'has_api_key': bool(groq_key),
+        'has_api_key': bool(gemini_key or groq_key),
+        'has_gemini_key': bool(gemini_key),
+        'has_groq_key': bool(groq_key),
         'current_model': get_current_model(),
         'embedding_type': emb_name,
         'supported_models': available_models,
@@ -454,12 +485,13 @@ def ask_question():
             'error': 'No active PDF documents found. Please upload at least one PDF document before asking questions.'
         })
     
+    gemini_api_key = get_gemini_api_key()
     groq_api_key = get_groq_api_key()
-    if not groq_api_key:
+    if not gemini_api_key and not groq_api_key:
         return jsonify({
             'success': False,
             'needs_api_key': True,
-            'error': 'Groq API Key is missing or not configured. Please create a key at console.groq.com and paste it in Settings.'
+            'error': 'No API Key configured. Please add your free Google Gemini API Key (aistudio.google.com) or Groq Key in Settings.'
         })
     
     try:
@@ -550,12 +582,26 @@ Answer:""",
         
         for model_name in models_to_try:
             try:
-                llm = ChatGroq(
-                    model=model_name,
-                    temperature=0.3,
-                    groq_api_key=groq_api_key,
-                    max_retries=1
-                )
+                if model_name.startswith('gemini'):
+                    if not gemini_api_key:
+                        continue
+                    from langchain_google_genai import ChatGoogleGenerativeAI
+                    llm = ChatGoogleGenerativeAI(
+                        model=model_name,
+                        temperature=0.3,
+                        google_api_key=gemini_api_key,
+                        max_retries=1
+                    )
+                else:
+                    if not groq_api_key:
+                        continue
+                    llm = ChatGroq(
+                        model=model_name,
+                        temperature=0.3,
+                        groq_api_key=groq_api_key,
+                        max_retries=1
+                    )
+                    
                 response = llm.invoke(formatted_prompt)
                 raw_answer = response.content.strip()
                 
@@ -579,17 +625,13 @@ Answer:""",
                 last_error = model_err
                 err_str = str(model_err).lower()
                 if "invalid api key" in err_str or "unauthorized" in err_str or "401" in err_str:
-                    return jsonify({
-                        'success': False,
-                        'needs_api_key': True,
-                        'error': 'Invalid Groq API Key. Please create a new key at console.groq.com and update it in Settings.'
-                    })
+                    continue
                 continue
         
         if answer_text is None:
             return jsonify({
                 'success': False,
-                'error': f"Failed to get response from Groq LLM: {str(last_error)}"
+                'error': f"Failed to get response from AI LLM: {str(last_error)}"
             })
             
         latency = round(time.time() - start_time, 2)
@@ -619,6 +661,33 @@ Answer:""",
     except Exception as e:
         print(f"Error during question answering: {str(e)}")
         return jsonify({'success': False, 'error': f"An error occurred: {str(e)}"})
+
+@app.route('/generate-image', methods=['POST'])
+def generate_image_route():
+    """Generates an AI diagram or visual illustration based on prompt or document concepts."""
+    data = request.get_json(silent=True) or {}
+    prompt = data.get('prompt', '').strip()
+    
+    if not prompt:
+        return jsonify({'success': False, 'error': 'Please provide an image prompt.'})
+        
+    try:
+        import urllib.parse
+        import random
+        
+        seed = random.randint(1000, 999999)
+        enhanced_prompt = f"high quality professional clean visual illustration diagram: {prompt}"
+        safe_prompt = urllib.parse.quote(enhanced_prompt)
+        image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=1024&nologo=true&seed={seed}&enhance=true"
+        
+        return jsonify({
+            'success': True,
+            'prompt': prompt,
+            'image_url': image_url,
+            'seed': seed
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': f"Failed to generate image: {str(e)}"})
 
 @app.route('/delete-file', methods=['POST'])
 def delete_file():
@@ -771,6 +840,11 @@ def handle_config():
     env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
     
     if request.method == 'GET':
+        gemini_key = get_gemini_api_key()
+        masked_gemini_key = ""
+        if gemini_key:
+            masked_gemini_key = gemini_key[:7] + "..." + gemini_key[-4:] if len(gemini_key) > 12 else "***"
+
         groq_key = get_groq_api_key()
         masked_key = ""
         if groq_key:
@@ -782,6 +856,8 @@ def handle_config():
             masked_el_key = el_key[:6] + "..." + el_key[-4:] if len(el_key) > 10 else "***"
             
         return jsonify({
+            'has_gemini_key': bool(gemini_key),
+            'masked_gemini_key': masked_gemini_key,
             'has_groq_key': bool(groq_key),
             'masked_key': masked_key,
             'has_elevenlabs_key': bool(el_key),
@@ -792,6 +868,7 @@ def handle_config():
         
     if request.method == 'POST':
         data = request.get_json(silent=True) or {}
+        new_gemini_key = data.get('gemini_api_key', '').strip()
         new_key = data.get('groq_api_key', '').strip()
         new_model = data.get('model', '').strip()
         new_el_key = data.get('elevenlabs_api_key', '').strip()
@@ -808,13 +885,17 @@ def handle_config():
             except Exception as read_err:
                 print(f"Could not read .env: {read_err}")
                         
+        if new_gemini_key:
+            env_lines['GEMINI_API_KEY'] = new_gemini_key
+            os.environ['GEMINI_API_KEY'] = new_gemini_key
+
         if new_key:
             env_lines['GROQ_API_KEY'] = new_key
             os.environ['GROQ_API_KEY'] = new_key
             
         if new_model:
-            env_lines['GROQ_MODEL'] = new_model
-            os.environ['GROQ_MODEL'] = new_model
+            env_lines['ACTIVE_MODEL'] = new_model
+            os.environ['ACTIVE_MODEL'] = new_model
             
         if new_el_key:
             env_lines['ELEVENLABS_API_KEY'] = new_el_key
@@ -833,6 +914,7 @@ def handle_config():
             'success': True,
             'message': 'Configuration updated successfully!',
             'current_model': get_current_model(),
+            'has_gemini_key': bool(get_gemini_api_key()),
             'has_groq_key': bool(get_groq_api_key()),
             'has_elevenlabs_key': bool(get_elevenlabs_api_key())
         })

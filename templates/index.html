@@ -1011,6 +1011,88 @@
             transform: translateY(-1px);
         }
 
+        /* AI Generated Image Card & Lightbox */
+        .ai-generated-image-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .ai-generated-image-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
+        }
+
+        .ai-rendered-img {
+            width: 100%;
+            max-height: 460px;
+            object-fit: contain;
+            display: block;
+            background: #090d16;
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+
+        .ai-image-overlay {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-download-img {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .btn-download-img:hover {
+            background: var(--accent-primary);
+            transform: scale(1.05);
+            color: #ffffff;
+        }
+
+        .image-lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(16px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            padding: 24px;
+        }
+
+        .image-lightbox img {
+            max-width: 92vw;
+            max-height: 90vh;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
         /* Welcome Empty View */
         .welcome-view {
             display: flex;
@@ -1695,15 +1777,23 @@
             </div>
             
             <div class="form-row">
-                <label for="apiKeyInput">Groq API Key</label>
-                <input type="password" id="apiKeyInput" class="input-field" placeholder="gsk_...">
+                <label for="geminiApiKeyInput">🌟 Google Gemini API Key (100% Free Tier)</label>
+                <input type="password" id="geminiApiKeyInput" class="input-field" placeholder="AIzaSy...">
                 <div class="form-hint">
-                    Get a free API key at <a href="https://console.groq.com/keys" target="_blank">console.groq.com</a>.
+                    Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a> (1,500 free requests/day).
                 </div>
             </div>
 
             <div class="form-row">
-                <label for="elevenLabsApiKeyInput">ElevenLabs API Key (Optional)</label>
+                <label for="apiKeyInput">⚡ Groq API Key (Optional)</label>
+                <input type="password" id="apiKeyInput" class="input-field" placeholder="gsk_...">
+                <div class="form-hint">
+                    Get an API key at <a href="https://console.groq.com/keys" target="_blank">console.groq.com</a>.
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="elevenLabsApiKeyInput">🎙️ ElevenLabs API Key (Optional)</label>
                 <input type="password" id="elevenLabsApiKeyInput" class="input-field" placeholder="sk_... or xi-api-key">
                 <div class="form-hint">
                     For hyper-realistic voices from <a href="https://elevenlabs.io" target="_blank">elevenlabs.io</a> (Free tier available).
@@ -1713,14 +1803,21 @@
             <div class="form-row">
                 <label for="modelSelectMenu">Active LLM Model</label>
                 <select id="modelSelectMenu" class="select-field">
-                    <option value="groq/compound-mini">groq/compound-mini (Fast Reasoning - Default)</option>
-                    <option value="groq/compound">groq/compound (Deep Reasoning & Synthesis)</option>
-                    <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Flagship Open Weights)</option>
-                    <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (Ultra Fast)</option>
-                    <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b (Qwen 3.6)</option>
+                    <optgroup label="🌟 Google Gemini Models (100% Free - Recommended)">
+                        <option value="gemini-2.0-flash" selected>gemini-2.0-flash (Ultra-Fast & Smart — Recommended)</option>
+                        <option value="gemini-1.5-flash">gemini-1.5-flash (High Throughput & 1M Context)</option>
+                        <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Multimodal Reasoning)</option>
+                    </optgroup>
+                    <optgroup label="⚡ Groq Cloud Models (Ultra-Low Latency)">
+                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Llama 3.3 70B)</option>
+                        <option value="groq/compound-mini">groq/compound-mini (Groq Compound)</option>
+                        <option value="groq/compound">groq/compound (Deep Reasoning)</option>
+                        <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Flagship Open Weights)</option>
+                        <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b (Qwen 3.6)</option>
+                    </optgroup>
                 </select>
                 <div class="form-hint">
-                    Loaded dynamically directly from your Groq Cloud account.
+                    Seamlessly switch between Google Gemini and Groq models.
                 </div>
             </div>
 
@@ -1761,6 +1858,11 @@
                 <button class="btn-action-primary" onclick="saveConfiguration()">Save Settings</button>
             </div>
         </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div class="image-lightbox" id="imageLightbox" onclick="closeImageLightbox()">
+        <img id="lightboxImg" src="" alt="AI Generated Diagram">
     </div>
 
     <!-- Toast Container -->
@@ -1863,30 +1965,25 @@
                 const data = await res.json();
                 
                 registeredDocs = data.files || [];
-                selectedModel = data.current_model || 'groq/compound-mini';
+                selectedModel = data.current_model || 'gemini-2.0-flash';
                 
-                if (data.has_api_key) {
+                if (data.has_gemini_key && data.has_groq_key) {
+                    apiPulseDot.className = 'pulse-dot';
+                    apiPillText.textContent = 'Gemini + Groq ✨';
+                } else if (data.has_gemini_key) {
+                    apiPulseDot.className = 'pulse-dot';
+                    apiPillText.textContent = 'Gemini Active ✨';
+                } else if (data.has_groq_key) {
                     apiPulseDot.className = 'pulse-dot';
                     apiPillText.textContent = 'Groq Connected';
                 } else {
                     apiPulseDot.className = 'pulse-dot warning';
-                    apiPillText.textContent = 'Configure Groq';
+                    apiPillText.textContent = 'Configure API Key';
                 }
 
                 embPillText.textContent = 'Local MiniLM + OCR';
                 activeModelLabel.textContent = selectedModel;
                 
-                if (data.supported_models && data.supported_models.length > 0) {
-                    modelSelectMenu.innerHTML = '';
-                    data.supported_models.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m;
-                        opt.textContent = m;
-                        if (m === selectedModel) opt.selected = true;
-                        modelSelectMenu.appendChild(opt);
-                    });
-                }
-
                 renderDocumentList();
             } catch (err) {
                 console.error("Status fetch error:", err);
@@ -2068,9 +2165,9 @@
         async function clearChat() {
             try {
                 await fetch('/clear-history', { method: 'POST' });
-                conversationLog = [];
-                resetChatMessages();
-                triggerToast('Chat history cleared', 'info');
+} else {
+                    triggerToast('Failed to clear history', 'error');
+                }
             } catch (err) {
                 triggerToast('Failed to clear history', 'error');
             }
@@ -2094,6 +2191,14 @@
             if (e) e.preventDefault();
             const question = queryInput.value.trim();
             if (!question || isAnswering) return;
+
+            // Check for image generation commands
+            if (question.toLowerCase().startsWith('/image ') || question.toLowerCase().startsWith('/diagram ')) {
+                const imgPrompt = question.replace(/^\/(image|diagram)\s+/i, '').trim();
+                queryInput.value = '';
+                await triggerImageGeneration(imgPrompt);
+                return;
+            }
 
             if (!registeredDocs || registeredDocs.length === 0) {
                 triggerToast('Please upload at least one PDF document first!', 'error');
@@ -2127,7 +2232,7 @@
                     streamBotResponse(data.answer, data.sources, data.latency, data.model_used, data.chunks_count, data.follow_ups);
                 } else {
                     if (data.needs_api_key) {
-                        appendStaticBotBubble(`⚠️ **Groq API Key Required**\n\n${data.error}\n\nPlease click **[Settings]** at the top right to save your key.`);
+                        appendStaticBotBubble(`⚠️ **API Key Required**\n\n${data.error}\n\nPlease click **[Settings]** at the top right to save your free Google Gemini or Groq key.`);
                         openConfigModal();
                     } else {
                         appendStaticBotBubble(`❌ **Error:** ${data.error}`);
@@ -2174,7 +2279,7 @@
         }
 
         // Streaming Response with Source Inspector & Dynamic Follow-up Chips
-        function streamBotResponse(fullMarkdown, sources = [], latency = 0.5, model = 'groq/compound-mini', chunksCount = 8, followUps = []) {
+        function streamBotResponse(fullMarkdown, sources = [], latency = 0.5, model = 'gemini-2.0-flash', chunksCount = 8, followUps = []) {
             const row = document.createElement('div');
             row.className = 'msg-row bot';
 
@@ -2218,7 +2323,7 @@
                         bubble.appendChild(tray);
                     }
 
-                    // Add Metrics & Action Row
+                    // Add Metrics & Action Row with AI Diagram Generator Button
                     const actions = document.createElement('div');
                     actions.className = 'msg-footer-actions';
                     actions.innerHTML = `
@@ -2227,6 +2332,9 @@
                         </button>
                         <button class="btn-msg-action" onclick="readAloud(this)">
                             🔊 <span>Read Aloud</span>
+                        </button>
+                        <button class="btn-msg-action" onclick="generateVisualDiagram(this)" title="Generate AI Diagram / Illustration for this concept">
+                            🎨 <span>Generate Diagram</span>
                         </button>
                         <div class="inference-badge">
                             <span>⚡ ${latency}s</span>
@@ -2263,7 +2371,96 @@
         }
 
         // ==========================================================================
-        // 6. Source Inspector Drawer
+        // 6. AI Diagram & Image Generation Engine
+        // ==========================================================================
+        async function generateVisualDiagram(btn) {
+            const box = btn.closest('.msg-bubble-box');
+            const bubble = box.querySelector('.msg-bubble');
+            const text = bubble.innerText.replace(/📌 Citations:.*/s, '').trim();
+            const lines = text.split('\n').map(l => l.replace(/^[#\-*\d\.\s]+/, '').trim()).filter(l => l.length > 8);
+            const prompt = lines[0] ? lines[0].substring(0, 140) : 'cloud architecture and system components diagram';
+            await triggerImageGeneration(prompt);
+        }
+
+        async function triggerImageGeneration(prompt) {
+            if (isAnswering) return;
+            if (welcomeView && welcomeView.parentNode === chatScrollArea) {
+                welcomeView.remove();
+            }
+
+            appendUserBubble(`🎨 Generate Diagram / Visual: ${prompt}`);
+            isAnswering = true;
+            typingLoader.style.display = 'flex';
+            chatScrollArea.scrollTop = chatScrollArea.scrollHeight;
+
+            try {
+                const res = await fetch('/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                typingLoader.style.display = 'none';
+
+                if (data.success && data.image_url) {
+                    appendGeneratedImageBubble(data.prompt, data.image_url);
+                } else {
+                    appendStaticBotBubble(`❌ **Image Generation Error:** ${data.error || 'Failed to generate visual.'}`);
+                }
+            } catch (err) {
+                typingLoader.style.display = 'none';
+                appendStaticBotBubble('❌ Network error while generating AI diagram.');
+            } finally {
+                isAnswering = false;
+                queryInput.focus();
+                chatScrollArea.scrollTop = chatScrollArea.scrollHeight;
+            }
+        }
+
+        function appendGeneratedImageBubble(prompt, imageUrl) {
+            const row = document.createElement('div');
+            row.className = 'msg-row bot';
+            row.innerHTML = `
+                <div class="msg-avatar">🎨</div>
+                <div class="msg-bubble-box">
+                    <div class="msg-bubble image-bubble">
+                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                            <span>✨</span> <span>AI Visual Diagram</span>
+                        </div>
+                        <div class="ai-generated-image-card">
+                            <img src="${imageUrl}" alt="${escapeHtml(prompt)}" class="ai-rendered-img" onclick="openImageLightbox('${imageUrl}')">
+                            <div class="ai-image-overlay">
+                                <a href="${imageUrl}" target="_blank" download="diagram-${Date.now()}.png" class="btn-download-img">
+                                    📥 Download Image
+                                </a>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; font-weight: 500;">
+                            Concept: <em>${escapeHtml(prompt)}</em>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatScrollArea.appendChild(row);
+            chatScrollArea.scrollTop = chatScrollArea.scrollHeight;
+        }
+
+        function openImageLightbox(url) {
+            const box = document.getElementById('imageLightbox');
+            const img = document.getElementById('lightboxImg');
+            if (box && img) {
+                img.src = url;
+                box.style.display = 'flex';
+            }
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('imageLightbox');
+            if (box) box.style.display = 'none';
+        }
+
+        // ==========================================================================
+        // 7. Source Inspector Drawer
         // ==========================================================================
         let currentDrawerSnippet = '';
         let currentDrawerFile = '';
@@ -2308,7 +2505,7 @@
         });
 
         // ==========================================================================
-        // 7. Voice Dictation (Web Speech API) & Audio Read-Aloud (TTS)
+        // 8. Voice Dictation (Speech-to-Text) & Voice Synthesis (TTS)
         // ==========================================================================
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2328,7 +2525,7 @@
                 recognition.onerror = () => stopRecording();
                 recognition.onend = () => stopRecording();
             } else {
-                micBtn.style.display = 'none';
+                if (micBtn) micBtn.style.display = 'none';
             }
         }
 
@@ -2352,48 +2549,52 @@
 
         function stopRecording() {
             isRecording = false;
-            micBtn.classList.remove('recording');
-            micBtn.title = 'Voice Dictation (Speech-to-Text)';
+            if (micBtn) {
+                micBtn.classList.remove('recording');
+                micBtn.title = 'Voice Dictation (Speech-to-Text)';
+            }
         }
 
         let activeAudio = null;
         let activeAudioBtn = null;
 
         async function readAloud(btn) {
-            // If already playing audio on this or another message, stop it
-            if (activeAudio && !activeAudio.paused) {
+            const bubble = btn.closest('.msg-bubble-box').querySelector('.msg-bubble');
+            const textToRead = bubble.innerText.replace(/📌 Citations:.*/s, '').trim();
+
+            if (activeAudio && activeAudioBtn === btn) {
                 activeAudio.pause();
-                activeAudio.currentTime = 0;
-                if (activeAudioBtn) activeAudioBtn.innerHTML = '🔊 <span>Read Aloud</span>';
-                if (activeAudioBtn === btn) {
-                    activeAudio = null;
-                    activeAudioBtn = null;
-                    return;
-                }
+                activeAudio = null;
+                activeAudioBtn = null;
+                btn.innerHTML = '🔊 <span>Read Aloud</span>';
+                return;
             }
 
-            const bubble = btn.closest('.msg-bubble-box').querySelector('.msg-bubble');
-            const rawText = bubble.innerText;
-            // Clean citations and follow-up texts from speech string
-            const textToRead = rawText.replace(/📌 Citations:[\s\S]*/, '').replace(/💡 Suggested Follow-ups:[\s\S]*/, '').trim();
-            const voice = localStorage.getItem('cognipdf_voice') || 'en-US-AriaNeural';
+            if (activeAudio) {
+                activeAudio.pause();
+                if (activeAudioBtn) activeAudioBtn.innerHTML = '🔊 <span>Read Aloud</span>';
+            }
 
             btn.innerHTML = '⏳ <span>Synthesizing...</span>';
             activeAudioBtn = btn;
 
+            const selectedVoice = localStorage.getItem('cognipdf_voice') || 'en-US-AriaNeural';
+
             try {
-                const res = await fetch('/tts', {
+                const response = await fetch('/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: textToRead, voice })
+                    body: JSON.stringify({ text: textToRead, voice: selectedVoice })
                 });
 
-                if (!res.ok) throw new Error('Server TTS returned error');
+                if (!response.ok) {
+                    throw new Error(`TTS server returned status ${response.status}`);
+                }
 
-                const audioBlob = await res.blob();
+                const audioBlob = await response.blob();
                 const audioUrl = URL.createObjectURL(audioBlob);
-                activeAudio = new Audio(audioUrl);
 
+                activeAudio = new Audio(audioUrl);
                 btn.innerHTML = '⏹️ <span>Stop Audio</span>';
                 activeAudio.play();
 
@@ -2441,7 +2642,7 @@
         }
 
         // ==========================================================================
-        // 8. Export Conversation Suite
+        // 9. Export Conversation Suite
         // ==========================================================================
         function exportConversation() {
             if (!conversationLog || conversationLog.length === 0) {
@@ -2487,12 +2688,15 @@
         }
 
         // ==========================================================================
-        // 9. Settings Modal Handlers
+        // 10. Settings Modal Handlers
         // ==========================================================================
         async function openConfigModal() {
             try {
                 const res = await fetch('/config');
                 const data = await res.json();
+                if (data.has_gemini_key && data.masked_gemini_key) {
+                    document.getElementById('geminiApiKeyInput').placeholder = `Configured (${data.masked_gemini_key})`;
+                }
                 if (data.has_groq_key && data.masked_key) {
                     document.getElementById('apiKeyInput').placeholder = `Configured (${data.masked_key})`;
                 }
@@ -2517,6 +2721,7 @@
         }
 
         async function saveConfiguration() {
+            const geminiKey = document.getElementById('geminiApiKeyInput').value.trim();
             const key = document.getElementById('apiKeyInput').value.trim();
             const elKey = document.getElementById('elevenLabsApiKeyInput').value.trim();
             const model = document.getElementById('modelSelectMenu').value;
@@ -2530,7 +2735,7 @@
                 const res = await fetch('/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ groq_api_key: key, model, elevenlabs_api_key: elKey })
+                    body: JSON.stringify({ gemini_api_key: geminiKey, groq_api_key: key, model, elevenlabs_api_key: elKey })
                 });
                 const data = await res.json();
                 if (data.success) {
