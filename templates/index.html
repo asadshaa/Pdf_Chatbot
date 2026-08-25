@@ -2164,8 +2164,13 @@
 
         async function clearChat() {
             try {
-                await fetch('/clear-history', { method: 'POST' });
-} else {
+                const res = await fetch('/clear-history', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    conversationLog = [];
+                    resetChatMessages();
+                    triggerToast('Chat history cleared', 'info');
+                } else {
                     triggerToast('Failed to clear history', 'error');
                 }
             } catch (err) {
