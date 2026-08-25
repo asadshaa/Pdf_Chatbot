@@ -1381,9 +1381,10 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.68);
-            backdrop-filter: blur(10px);
-            z-index: 100;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -1769,8 +1770,8 @@
     </div>
 
     <!-- Settings / Config Modal -->
-    <div class="modal-backdrop" id="configModal">
-        <div class="modal-card">
+    <div class="modal-backdrop" id="configModal" onclick="closeConfigModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-head">
                 <h3>⚙️ Settings & Configuration</h3>
                 <button class="btn-close-x" onclick="closeConfigModal()">&times;</button>
@@ -2695,34 +2696,45 @@
         // ==========================================================================
         // 10. Settings Modal Handlers
         // ==========================================================================
-        async function openConfigModal() {
-            try {
-                const res = await fetch('/config');
-                const data = await res.json();
-                if (data.has_gemini_key && data.masked_gemini_key) {
-                    document.getElementById('geminiApiKeyInput').placeholder = `Configured (${data.masked_gemini_key})`;
-                }
-                if (data.has_groq_key && data.masked_key) {
-                    document.getElementById('apiKeyInput').placeholder = `Configured (${data.masked_key})`;
-                }
-                if (data.has_elevenlabs_key && data.masked_elevenlabs_key) {
-                    document.getElementById('elevenLabsApiKeyInput').placeholder = `Configured (${data.masked_elevenlabs_key})`;
-                }
-                if (data.current_model) {
-                    selectedModel = data.current_model;
-                    document.getElementById('modelSelectMenu').value = data.current_model;
-                }
-            } catch (e) {}
+        function openConfigModal() {
+            const modal = document.getElementById('configModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
 
             const savedVoice = localStorage.getItem('cognipdf_voice') || 'en-US-AriaNeural';
             const voiceSelect = document.getElementById('voiceSelectMenu');
             if (voiceSelect) voiceSelect.value = savedVoice;
-            
-            configModal.style.display = 'flex';
+
+            fetch('/config')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.has_gemini_key && data.masked_gemini_key) {
+                        const g = document.getElementById('geminiApiKeyInput');
+                        if (g) g.placeholder = `Configured (${data.masked_gemini_key})`;
+                    }
+                    if (data.has_groq_key && data.masked_key) {
+                        const k = document.getElementById('apiKeyInput');
+                        if (k) k.placeholder = `Configured (${data.masked_key})`;
+                    }
+                    if (data.has_elevenlabs_key && data.masked_elevenlabs_key) {
+                        const el = document.getElementById('elevenLabsApiKeyInput');
+                        if (el) el.placeholder = `Configured (${data.masked_elevenlabs_key})`;
+                    }
+                    if (data.current_model) {
+                        selectedModel = data.current_model;
+                        const m = document.getElementById('modelSelectMenu');
+                        if (m) m.value = data.current_model;
+                    }
+                })
+                .catch(e => console.warn('Config fetch error:', e));
         }
 
-        function closeConfigModal() {
-            configModal.style.display = 'none';
+        function closeConfigModal(e) {
+            if (!e || e.target.id === 'configModal' || (e.target && e.target.className === 'btn-close-x') || (e.target && e.target.textContent === 'Cancel')) {
+                const modal = document.getElementById('configModal');
+                if (modal) modal.style.display = 'none';
+            }
         }
 
         async function saveConfiguration() {
