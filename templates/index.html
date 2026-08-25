@@ -233,27 +233,27 @@
         }
 
         @keyframes orbFloat1 {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(120px, 80px) scale(1.15); }
-            100% { transform: translate(40px, 140px) scale(0.95); }
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(120px, 80px, 0) scale(1.12); }
+            100% { transform: translate3d(40px, 140px, 0) scale(0.96); }
         }
 
         @keyframes orbFloat2 {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-100px, -70px) scale(1.12); }
-            100% { transform: translate(-50px, -120px) scale(0.9); }
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(-100px, -70px, 0) scale(1.1); }
+            100% { transform: translate3d(-50px, -120px, 0) scale(0.92); }
         }
 
         @keyframes orbFloat3 {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-30%, -65%) scale(1.2); }
-            100% { transform: translate(-65%, -35%) scale(0.92); }
+            0% { transform: translate3d(-50%, -50%, 0) scale(1); }
+            50% { transform: translate3d(-35%, -60%, 0) scale(1.15); }
+            100% { transform: translate3d(-60%, -40%, 0) scale(0.94); }
         }
 
         @keyframes orbFloat4 {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-80px, 90px) scale(1.18); }
-            100% { transform: translate(60px, -50px) scale(0.96); }
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(-80px, 90px, 0) scale(1.12); }
+            100% { transform: translate3d(60px, -50px, 0) scale(0.96); }
         }
 
         /* ==========================================================================
@@ -2571,19 +2571,30 @@
             let mouseY = window.innerHeight / 2;
             let currentX = mouseX;
             let currentY = mouseY;
+            let isTicking = false;
 
             window.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
-            });
+                if (!isTicking) {
+                    isTicking = true;
+                    requestAnimationFrame(renderSpotlight);
+                }
+            }, { passive: true });
 
             function renderSpotlight() {
-                currentX += (mouseX - currentX) * 0.08;
-                currentY += (mouseY - currentY) * 0.08;
-                mouseSpotlight.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%)`;
-                requestAnimationFrame(renderSpotlight);
+                const dx = mouseX - currentX;
+                const dy = mouseY - currentY;
+                currentX += dx * 0.12;
+                currentY += dy * 0.12;
+                mouseSpotlight.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+                
+                if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+                    requestAnimationFrame(renderSpotlight);
+                } else {
+                    isTicking = false;
+                }
             }
-            requestAnimationFrame(renderSpotlight);
         }
     </script>
 </body>

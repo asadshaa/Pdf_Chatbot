@@ -3,6 +3,7 @@ import time
 import shutil
 import re
 import tempfile
+import threading
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, Response
 from werkzeug.utils import secure_filename
@@ -33,7 +34,7 @@ load_dotenv(override=True)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'rag-pdf-reader-secret-key-2026')
 
-# Support both local environments and Vercel serverless (/tmp)
+# Support both local environments and Vercel/Render ephemeral storage
 if os.environ.get('VERCEL') or not os.access(os.path.dirname(os.path.abspath(__file__)), os.W_OK):
     app.config['UPLOAD_FOLDER'] = os.path.join(tempfile.gettempdir(), 'pdf_uploads')
 else:
@@ -44,7 +45,8 @@ app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64MB max file size
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# State management
+# State management with thread safety
+state_lock = threading.Lock()
 history = []  # List of {'role': 'user'|'assistant', 'content': str}
 current_files = []  # List of dicts: {'name': str, 'display_name': str, 'pages': int, 'chunks': int, 'size': str}
 vector_store = None
@@ -375,64 +377,65 @@ def status():
 def upload_file():
     global current_files
     
-    try:
-        if 'file' not in request.files:
-            return jsonify({'success': False, 'error': 'No file part in request'})
-        
-        file = request.files['file']
-        if not file or file.filename == '':
-            return jsonify({'success': False, 'error': 'No file selected'})
-        
-        if not allowed_file(file.filename):
-            return jsonify({'success': False, 'error': 'Invalid file format. Please upload a .pdf file.'})
-        
-        display_name = file.filename
-        safe_name = secure_filename(file.filename)
-        if not safe_name or not safe_name.endswith('.pdf'):
-            safe_name = f"doc_{int(time.time())}.pdf"
+    with state_lock:
+        try:
+            if 'file' not in request.files:
+                return jsonify({'success': False, 'error': 'No file part in request'})
             
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
-        file.save(file_path)
-        
-        file_size_bytes = os.path.getsize(file_path)
-        file_size_str = format_file_size(file_size_bytes)
-        
-        # Only rebuild vector store if overwriting an existing document
-        if any(f['name'] == safe_name for f in current_files):
-            current_files = [f for f in current_files if f['name'] != safe_name]
-            rebuild_vector_store()
-        
-        # Process newly saved PDF
-        success, message, pages_count, chunks_count = process_pdf(file_path, safe_name)
-        
-        if success:
-            file_meta = {
-                'name': safe_name,
-                'display_name': display_name,
-                'pages': pages_count,
-                'chunks': chunks_count,
-                'size': file_size_str
-            }
-            current_files.append(file_meta)
+            file = request.files['file']
+            if not file or file.filename == '':
+                return jsonify({'success': False, 'error': 'No file selected'})
             
-            return jsonify({
-                'success': True,
-                'message': message,
-                'file': file_meta,
-                'total_files': len(current_files),
-                'all_files': current_files
-            })
-        else:
-            if os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                except Exception:
-                    pass
-            rebuild_vector_store()
-            return jsonify({'success': False, 'error': message})
+            if not allowed_file(file.filename):
+                return jsonify({'success': False, 'error': 'Invalid file format. Please upload a .pdf file.'})
             
-    except Exception as e:
-        return jsonify({'success': False, 'error': f"Upload failed: {str(e)}"})
+            display_name = file.filename
+            safe_name = secure_filename(file.filename)
+            if not safe_name or not safe_name.endswith('.pdf'):
+                safe_name = f"doc_{int(time.time())}.pdf"
+                
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
+            file.save(file_path)
+            
+            file_size_bytes = os.path.getsize(file_path)
+            file_size_str = format_file_size(file_size_bytes)
+            
+            # Only rebuild vector store if overwriting an existing document
+            if any(f['name'] == safe_name for f in current_files):
+                current_files = [f for f in current_files if f['name'] != safe_name]
+                rebuild_vector_store()
+            
+            # Process newly saved PDF
+            success, message, pages_count, chunks_count = process_pdf(file_path, safe_name)
+            
+            if success:
+                file_meta = {
+                    'name': safe_name,
+                    'display_name': display_name,
+                    'pages': pages_count,
+                    'chunks': chunks_count,
+                    'size': file_size_str
+                }
+                current_files = [f for f in current_files if f['name'] != safe_name]
+                current_files.append(file_meta)
+                
+                return jsonify({
+                    'success': True,
+                    'message': message,
+                    'file': file_meta,
+                    'total_files': len(current_files),
+                    'all_files': current_files
+                })
+            else:
+                if os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except Exception:
+                        pass
+                return jsonify({'success': False, 'error': message})
+                
+        except Exception as e:
+            return jsonify({'success': False, 'error': f"Upload failed: {str(e)}"})
 
 @app.route('/ask', methods=['POST'])
 def ask_question():
