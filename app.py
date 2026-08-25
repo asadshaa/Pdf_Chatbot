@@ -2,6 +2,7 @@ import os
 import time
 import shutil
 import re
+import tempfile
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, Response
 from werkzeug.utils import secure_filename
@@ -25,7 +26,13 @@ load_dotenv(override=True)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'rag-pdf-reader-secret-key-2026')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+
+# Support both local environments and Vercel serverless (/tmp)
+if os.environ.get('VERCEL') or not os.access(os.path.dirname(os.path.abspath(__file__)), os.W_OK):
+    app.config['UPLOAD_FOLDER'] = os.path.join(tempfile.gettempdir(), 'pdf_uploads')
+else:
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64MB max file size
 
 # Ensure upload directory exists
@@ -726,12 +733,15 @@ def handle_config():
         
         env_lines = {}
         if os.path.exists(env_path):
-            with open(env_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#') and '=' in line:
-                        k, v = line.split('=', 1)
-                        env_lines[k.strip()] = v.strip().strip('"').strip("'")
+            try:
+                with open(env_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#') and '=' in line:
+                            k, v = line.split('=', 1)
+                            env_lines[k.strip()] = v.strip().strip('"').strip("'")
+            except Exception as read_err:
+                print(f"Could not read .env: {read_err}")
                         
         if new_key:
             env_lines['GROQ_API_KEY'] = new_key
@@ -745,9 +755,12 @@ def handle_config():
             env_lines['ELEVENLABS_API_KEY'] = new_el_key
             os.environ['ELEVENLABS_API_KEY'] = new_el_key
             
-        with open(env_path, 'w', encoding='utf-8') as f:
-            for k, v in env_lines.items():
-                f.write(f'{k} = "{v}"\n')
+        try:
+            with open(env_path, 'w', encoding='utf-8') as f:
+                for k, v in env_lines.items():
+                    f.write(f'{k} = "{v}"\n')
+        except Exception as write_err:
+            print(f"Serverless mode: cannot write .env to disk ({write_err}). Variables updated in-memory.")
                 
         load_dotenv(override=True)
         
