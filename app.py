@@ -205,29 +205,49 @@ def extract_pdf_documents(file_path, filename):
         except Exception as e:
             print(f"pdfplumber extraction error on {filename}: {e}")
 
-    # Engine 3: RapidOCR Fallback for Scanned image PDFs
-    if not documents and total_pages > 0:
-        print(f"No selectable text found in {filename}. Running automatic OCR across {total_pages} page(s)...")
+    # Engine 3: pypdf fallback
+    if not documents:
         try:
-            ocr = get_ocr_engine()
-            doc = pymupdf.open(file_path)
-            for idx, page in enumerate(doc):
-                try:
-                    pix = page.get_pixmap(dpi=150)
-                    img_bytes = pix.tobytes("png")
-                    ocr_res, _ = ocr(img_bytes)
-                    if ocr_res:
-                        page_text = " ".join([item[1] for item in ocr_res if item and len(item) > 1])
-                        if page_text.strip():
-                            documents.append(Document(
-                                page_content=page_text.strip(),
-                                metadata={"source_file": filename, "page": idx}
-                            ))
-                except Exception as page_ocr_err:
-                    print(f"OCR error on page {idx}: {page_ocr_err}")
-            doc.close()
-        except Exception as ocr_err:
-            print(f"OCR engine error on {filename}: {ocr_err}")
+            from pypdf import PdfReader
+            reader = PdfReader(file_path)
+            if total_pages == 0:
+                total_pages = len(reader.pages)
+            for idx, page in enumerate(reader.pages):
+                text = page.extract_text() or ""
+                if text.strip():
+                    documents.append(Document(
+                        page_content=text.strip(),
+                        metadata={"source_file": filename, "page": idx}
+                    ))
+        except Exception as e:
+            print(f"pypdf extraction error on {filename}: {e}")
+
+    # Engine 4: RapidOCR Fallback for Scanned image PDFs
+    if not documents and total_pages > 0:
+        print(f"No selectable text found in {filename}. Attempting OCR across {total_pages} page(s)...")
+        ocr = get_ocr_engine()
+        if ocr is not None:
+            try:
+                doc = pymupdf.open(file_path)
+                for idx, page in enumerate(doc):
+                    try:
+                        pix = page.get_pixmap(dpi=150)
+                        img_bytes = pix.tobytes("png")
+                        ocr_res, _ = ocr(img_bytes)
+                        if ocr_res:
+                            page_text = " ".join([item[1] for item in ocr_res if item and len(item) > 1])
+                            if page_text.strip():
+                                documents.append(Document(
+                                    page_content=page_text.strip(),
+                                    metadata={"source_file": filename, "page": idx}
+                                ))
+                    except Exception as page_ocr_err:
+                        print(f"OCR error on page {idx}: {page_ocr_err}")
+                doc.close()
+            except Exception as ocr_err:
+                print(f"OCR engine error on {filename}: {ocr_err}")
+        else:
+            print("OCR engine not available in this environment.")
 
     return documents, total_pages
 
