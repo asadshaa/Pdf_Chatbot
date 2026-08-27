@@ -434,13 +434,6 @@
             z-index: 10;
         }
 
-        @media (max-width: 1024px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                padding: 16px;
-            }
-        }
-
         .glass-panel {
             background: var(--bg-card);
             backdrop-filter: blur(28px);
@@ -1011,88 +1004,6 @@
             transform: translateY(-1px);
         }
 
-        /* AI Generated Image Card & Lightbox */
-        .ai-generated-image-card {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-top: 10px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-tertiary);
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .ai-generated-image-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--accent-primary);
-        }
-
-        .ai-rendered-img {
-            width: 100%;
-            max-height: 460px;
-            object-fit: contain;
-            display: block;
-            background: #090d16;
-            cursor: zoom-in;
-            transition: transform 0.3s ease;
-        }
-
-        .ai-image-overlay {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-download-img {
-            background: rgba(15, 23, 42, 0.88);
-            backdrop-filter: blur(12px);
-            color: #ffffff;
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        .btn-download-img:hover {
-            background: var(--accent-primary);
-            transform: scale(1.05);
-            color: #ffffff;
-        }
-
-        .image-lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.88);
-            backdrop-filter: blur(16px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            cursor: zoom-out;
-            padding: 24px;
-        }
-
-        .image-lightbox img {
-            max-width: 92vw;
-            max-height: 90vh;
-            border-radius: 14px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
         /* Welcome Empty View */
         .welcome-view {
             display: flex;
@@ -1381,10 +1292,9 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.72);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            z-index: 9999;
+            background: rgba(0, 0, 0, 0.68);
+            backdrop-filter: blur(10px);
+            z-index: 100;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -1559,6 +1469,333 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.65); }
+
+        /* ==========================================================================
+           9. Comprehensive Mobile & Tablet Responsive Design System
+           ========================================================================== */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .btn-mobile-docs {
+            display: none;
+            position: relative;
+            background: var(--accent-gradient-subtle);
+            border-color: var(--border-hover);
+            color: var(--accent-primary);
+            padding: 8px 12px;
+            font-size: 0.84rem;
+        }
+
+        .mobile-doc-badge {
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.68rem;
+            padding: 1px 6px;
+            font-weight: 800;
+            margin-left: 2px;
+            line-height: 1.2;
+        }
+
+        .mobile-sidebar-close {
+            display: none;
+            font-size: 1.4rem;
+            padding: 2px 6px;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 80;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-backdrop.active {
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Large Tablets & Small Laptops (<= 1024px) */
+        @media (max-width: 1024px) {
+            .navbar {
+                padding: 12px 18px;
+            }
+
+            .btn-mobile-docs {
+                display: inline-flex;
+            }
+
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 12px 16px;
+                gap: 16px;
+                height: auto;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 360px;
+                max-width: 86vw;
+                height: 100dvh;
+                background: var(--bg-canvas);
+                z-index: 90;
+                padding: 16px;
+                overflow-y: auto;
+                transform: translateX(-105%);
+                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-sidebar-close {
+                display: inline-flex;
+            }
+
+            .chat-container {
+                height: calc(100dvh - 84px);
+                min-height: 540px;
+            }
+        }
+
+        /* Portrait Tablets & Large Phones (<= 768px) */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+
+            .brand {
+                gap: 8px;
+            }
+
+            .brand-icon-box {
+                width: 36px;
+                height: 36px;
+                font-size: 17px;
+                border-radius: 10px;
+            }
+
+            .brand-text h1 {
+                font-size: 1.1rem;
+            }
+
+            .brand-subtitle {
+                font-size: 0.65rem;
+            }
+
+            .nav-actions {
+                gap: 6px;
+            }
+
+            .nav-actions .btn-nav-action span.nav-label {
+                display: none;
+            }
+
+            .nav-actions .btn-nav-action {
+                padding: 8px 10px;
+            }
+
+            .status-pill {
+                padding: 6px 10px;
+                font-size: 0.74rem;
+            }
+
+            .status-pill .pill-text {
+                display: none;
+            }
+
+            .main-container {
+                padding: 8px 10px;
+            }
+
+            .chat-container {
+                height: calc(100dvh - 72px);
+                min-height: 480px;
+                border-radius: 18px;
+            }
+
+            .chat-container .panel-header {
+                padding: 12px 14px;
+            }
+
+            .chat-body {
+                padding: 14px 10px;
+                gap: 14px;
+            }
+
+            .msg-row {
+                max-width: 96%;
+                gap: 8px;
+            }
+
+            .msg-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+
+            .msg-bubble {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+                line-height: 1.6;
+                border-radius: 16px;
+            }
+
+            .welcome-view {
+                padding: 18px 6px;
+            }
+
+            .welcome-view h3 {
+                font-size: 1.18rem;
+            }
+
+            .welcome-view p {
+                font-size: 0.84rem;
+                margin-bottom: 18px;
+            }
+
+            .prompt-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .prompt-chip {
+                padding: 10px 14px;
+                border-radius: 12px;
+            }
+
+            .chat-footer-bar {
+                padding: 8px 10px;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+
+            .chat-input-pill {
+                padding: 4px 6px 4px 12px;
+                border-radius: 26px;
+                min-height: 46px;
+                gap: 4px;
+            }
+
+            .main-chat-input {
+                font-size: 16px; /* Prevents auto-zoom in iOS Safari */
+            }
+
+            .btn-send-round {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
+
+            .btn-input-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            /* Source Inspector Bottom Sheet on Mobile */
+            .drawer-backdrop {
+                justify-content: flex-end;
+                align-items: flex-end;
+            }
+
+            .drawer-card {
+                max-width: 100vw;
+                height: auto;
+                max-height: 86dvh;
+                border-radius: 24px 24px 0 0;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+                padding: 20px 16px;
+                animation: drawerSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes drawerSlideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+
+            .modal-backdrop {
+                padding: 10px;
+                align-items: flex-end;
+            }
+
+            .modal-card {
+                max-width: 100vw;
+                padding: 20px 16px;
+                border-radius: 24px 24px 0 0;
+                max-height: 88dvh;
+                overflow-y: auto;
+            }
+
+            .input-field, .select-field {
+                font-size: 16px; /* Prevents auto-zoom on mobile */
+            }
+
+            .toast-holder {
+                bottom: 74px;
+                right: 12px;
+                left: 12px;
+                width: auto;
+            }
+
+            .toast-card {
+                min-width: 0;
+                padding: 12px 14px;
+                font-size: 0.84rem;
+            }
+        }
+
+        /* Small Smartphone Screens (<= 480px) */
+        @media (max-width: 480px) {
+            .brand-subtitle {
+                display: none !important;
+            }
+
+            .brand-text h1 {
+                font-size: 1.02rem;
+            }
+
+            .theme-toggle-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 0.95rem;
+                border-radius: 10px;
+            }
+
+            .nav-actions {
+                gap: 4px;
+            }
+
+            .btn-nav-action {
+                padding: 6px 8px;
+                border-radius: 10px;
+            }
+
+            .chat-container .panel-title span:first-child {
+                display: none;
+            }
+
+            .chat-container .panel-title {
+                font-size: 0.88rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1575,28 +1812,33 @@
     <!-- Top Sticky Navbar -->
     <header class="navbar">
         <div class="brand">
+            <!-- Mobile Document Hub Drawer Button (Visible on < 1024px) -->
+            <button class="btn-nav-action btn-mobile-docs" id="mobileDocsToggleBtn" onclick="toggleSidebar(true)" title="Open Documents Hub" aria-label="Toggle Document Hub">
+                📁 <span class="nav-label">Docs</span>
+                <span class="mobile-doc-badge" id="mobileDocCount">0</span>
+            </button>
             <div class="brand-icon-box">📚</div>
             <div class="brand-text">
                 <h1>CogniPDF AI</h1>
-                <span>Document Intelligence Workspace</span>
+                <span class="brand-subtitle">Document Intelligence Workspace</span>
             </div>
         </div>
         <div class="nav-actions">
             <!-- Vector Engine + OCR Status Pill -->
             <div class="status-pill" id="embPill" title="Local Vector & OCR Engine">
                 <span class="pulse-dot"></span>
-                <span id="embPillText">Local Vector + OCR</span>
+                <span id="embPillText" class="pill-text">Local Vector + OCR</span>
             </div>
             
             <!-- Groq API Status Pill -->
             <div class="status-pill" id="apiPill" onclick="openConfigModal()" title="Groq API Status (Click to configure)">
                 <span class="pulse-dot" id="apiPulseDot"></span>
-                <span id="apiPillText">Groq Connected</span>
+                <span id="apiPillText" class="pill-text">Groq Connected</span>
             </div>
 
             <!-- Export Chat Dropdown -->
             <button class="btn-nav-action" onclick="exportConversation()" title="Export Research Chat">
-                📥 <span>Export</span>
+                📥 <span class="nav-label">Export</span>
             </button>
 
             <!-- Dark / Light Mode Switcher Button -->
@@ -1606,22 +1848,28 @@
 
             <!-- Settings Modal Button -->
             <button class="btn-nav-action" onclick="openConfigModal()" title="Settings">
-                ⚙️ <span>Settings</span>
+                ⚙️ <span class="nav-label">Settings</span>
             </button>
         </div>
     </header>
 
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar(false)"></div>
+
     <!-- Main Workspace -->
     <main class="main-container">
         <!-- Sidebar: Document Hub -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="appSidebar">
             <div class="glass-panel">
                 <div class="panel-header">
                     <div class="panel-title">
                         <span>📄</span>
                         <span>Document Hub</span>
                     </div>
-                    <button class="btn-clear-all" id="clearAllBtn" style="display: none;" onclick="clearAllDocs()">Clear All</button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-clear-all" id="clearAllBtn" style="display: none;" onclick="clearAllDocs()">Clear All</button>
+                        <button class="btn-close-x mobile-sidebar-close" onclick="toggleSidebar(false)" title="Close Sidebar">&times;</button>
+                    </div>
                 </div>
                 
                 <div class="panel-body">
@@ -1770,31 +2018,23 @@
     </div>
 
     <!-- Settings / Config Modal -->
-    <div class="modal-backdrop" id="configModal" onclick="closeConfigModal(event)">
-        <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-backdrop" id="configModal">
+        <div class="modal-card">
             <div class="modal-head">
                 <h3>⚙️ Settings & Configuration</h3>
                 <button class="btn-close-x" onclick="closeConfigModal()">&times;</button>
             </div>
             
             <div class="form-row">
-                <label for="geminiApiKeyInput">🌟 Google Gemini API Key (100% Free Tier)</label>
-                <input type="password" id="geminiApiKeyInput" class="input-field" placeholder="AIzaSy...">
-                <div class="form-hint">
-                    Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a> (1,500 free requests/day).
-                </div>
-            </div>
-
-            <div class="form-row">
-                <label for="apiKeyInput">⚡ Groq API Key (Optional)</label>
+                <label for="apiKeyInput">Groq API Key</label>
                 <input type="password" id="apiKeyInput" class="input-field" placeholder="gsk_...">
                 <div class="form-hint">
-                    Get an API key at <a href="https://console.groq.com/keys" target="_blank">console.groq.com</a>.
+                    Get a free API key at <a href="https://console.groq.com/keys" target="_blank">console.groq.com</a>.
                 </div>
             </div>
 
             <div class="form-row">
-                <label for="elevenLabsApiKeyInput">🎙️ ElevenLabs API Key (Optional)</label>
+                <label for="elevenLabsApiKeyInput">ElevenLabs API Key (Optional)</label>
                 <input type="password" id="elevenLabsApiKeyInput" class="input-field" placeholder="sk_... or xi-api-key">
                 <div class="form-hint">
                     For hyper-realistic voices from <a href="https://elevenlabs.io" target="_blank">elevenlabs.io</a> (Free tier available).
@@ -1804,21 +2044,14 @@
             <div class="form-row">
                 <label for="modelSelectMenu">Active LLM Model</label>
                 <select id="modelSelectMenu" class="select-field">
-                    <optgroup label="🌟 Google Gemini Models (100% Free - Recommended)">
-                        <option value="gemini-2.0-flash" selected>gemini-2.0-flash (Ultra-Fast & Smart — Recommended)</option>
-                        <option value="gemini-1.5-flash">gemini-1.5-flash (High Throughput & 1M Context)</option>
-                        <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Multimodal Reasoning)</option>
-                    </optgroup>
-                    <optgroup label="⚡ Groq Cloud Models (Ultra-Low Latency)">
-                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Llama 3.3 70B)</option>
-                        <option value="groq/compound-mini">groq/compound-mini (Groq Compound)</option>
-                        <option value="groq/compound">groq/compound (Deep Reasoning)</option>
-                        <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Flagship Open Weights)</option>
-                        <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b (Qwen 3.6)</option>
-                    </optgroup>
+                    <option value="groq/compound-mini">groq/compound-mini (Fast Reasoning - Default)</option>
+                    <option value="groq/compound">groq/compound (Deep Reasoning & Synthesis)</option>
+                    <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Flagship Open Weights)</option>
+                    <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (Ultra Fast)</option>
+                    <option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b (Qwen 3.6)</option>
                 </select>
                 <div class="form-hint">
-                    Seamlessly switch between Google Gemini and Groq models.
+                    Loaded dynamically directly from your Groq Cloud account.
                 </div>
             </div>
 
@@ -1859,11 +2092,6 @@
                 <button class="btn-action-primary" onclick="saveConfiguration()">Save Settings</button>
             </div>
         </div>
-    </div>
-
-    <!-- Image Lightbox Modal -->
-    <div class="image-lightbox" id="imageLightbox" onclick="closeImageLightbox()">
-        <img id="lightboxImg" src="" alt="AI Generated Diagram">
     </div>
 
     <!-- Toast Container -->
@@ -1966,25 +2194,30 @@
                 const data = await res.json();
                 
                 registeredDocs = data.files || [];
-                selectedModel = data.current_model || 'gemini-2.0-flash';
+                selectedModel = data.current_model || 'groq/compound-mini';
                 
-                if (data.has_gemini_key && data.has_groq_key) {
-                    apiPulseDot.className = 'pulse-dot';
-                    apiPillText.textContent = 'Gemini + Groq ✨';
-                } else if (data.has_gemini_key) {
-                    apiPulseDot.className = 'pulse-dot';
-                    apiPillText.textContent = 'Gemini Active ✨';
-                } else if (data.has_groq_key) {
+                if (data.has_api_key) {
                     apiPulseDot.className = 'pulse-dot';
                     apiPillText.textContent = 'Groq Connected';
                 } else {
                     apiPulseDot.className = 'pulse-dot warning';
-                    apiPillText.textContent = 'Configure API Key';
+                    apiPillText.textContent = 'Configure Groq';
                 }
 
                 embPillText.textContent = 'Local MiniLM + OCR';
                 activeModelLabel.textContent = selectedModel;
                 
+                if (data.supported_models && data.supported_models.length > 0) {
+                    modelSelectMenu.innerHTML = '';
+                    data.supported_models.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m;
+                        if (m === selectedModel) opt.selected = true;
+                        modelSelectMenu.appendChild(opt);
+                    });
+                }
+
                 renderDocumentList();
             } catch (err) {
                 console.error("Status fetch error:", err);
@@ -2077,13 +2310,39 @@
             }
         }
 
+        // ==========================================================================
+        // Mobile Sidebar Drawer Controller
+        // ==========================================================================
+        function toggleSidebar(show) {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar || !backdrop) return;
+            
+            if (typeof show === 'boolean') {
+                if (show) {
+                    sidebar.classList.add('open');
+                    backdrop.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    sidebar.classList.remove('open');
+                    backdrop.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            } else {
+                const isOpen = sidebar.classList.contains('open');
+                toggleSidebar(!isOpen);
+            }
+        }
+
         function renderDocumentList() {
             docList.innerHTML = '';
+            const mobileDocCount = document.getElementById('mobileDocCount');
             
             if (!registeredDocs || registeredDocs.length === 0) {
                 docList.appendChild(emptyDocsState);
                 clearAllBtn.style.display = 'none';
                 activeDocCountBadge.textContent = '0 Documents';
+                if (mobileDocCount) mobileDocCount.textContent = '0';
                 indexStatsLabel.textContent = 'Awaiting PDFs';
                 indexStatsLabel.style.color = 'var(--text-muted)';
                 return;
@@ -2091,6 +2350,7 @@
 
             clearAllBtn.style.display = 'block';
             activeDocCountBadge.textContent = `${registeredDocs.length} Document${registeredDocs.length > 1 ? 's' : ''}`;
+            if (mobileDocCount) mobileDocCount.textContent = `${registeredDocs.length}`;
             
             const totalPages = registeredDocs.reduce((acc, doc) => acc + (doc.pages || 0), 0);
             const totalChunks = registeredDocs.reduce((acc, doc) => acc + (doc.chunks || 0), 0);
@@ -2165,15 +2425,10 @@
 
         async function clearChat() {
             try {
-                const res = await fetch('/clear-history', { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    conversationLog = [];
-                    resetChatMessages();
-                    triggerToast('Chat history cleared', 'info');
-                } else {
-                    triggerToast('Failed to clear history', 'error');
-                }
+                await fetch('/clear-history', { method: 'POST' });
+                conversationLog = [];
+                resetChatMessages();
+                triggerToast('Chat history cleared', 'info');
             } catch (err) {
                 triggerToast('Failed to clear history', 'error');
             }
@@ -2198,12 +2453,8 @@
             const question = queryInput.value.trim();
             if (!question || isAnswering) return;
 
-            // Check for image generation commands
-            if (question.toLowerCase().startsWith('/image ') || question.toLowerCase().startsWith('/diagram ')) {
-                const imgPrompt = question.replace(/^\/(image|diagram)\s+/i, '').trim();
-                queryInput.value = '';
-                await triggerImageGeneration(imgPrompt);
-                return;
+            if (window.innerWidth <= 1024) {
+                toggleSidebar(false);
             }
 
             if (!registeredDocs || registeredDocs.length === 0) {
@@ -2238,7 +2489,7 @@
                     streamBotResponse(data.answer, data.sources, data.latency, data.model_used, data.chunks_count, data.follow_ups);
                 } else {
                     if (data.needs_api_key) {
-                        appendStaticBotBubble(`⚠️ **API Key Required**\n\n${data.error}\n\nPlease click **[Settings]** at the top right to save your free Google Gemini or Groq key.`);
+                        appendStaticBotBubble(`⚠️ **Groq API Key Required**\n\n${data.error}\n\nPlease click **[Settings]** at the top right to save your key.`);
                         openConfigModal();
                     } else {
                         appendStaticBotBubble(`❌ **Error:** ${data.error}`);
@@ -2285,7 +2536,7 @@
         }
 
         // Streaming Response with Source Inspector & Dynamic Follow-up Chips
-        function streamBotResponse(fullMarkdown, sources = [], latency = 0.5, model = 'gemini-2.0-flash', chunksCount = 8, followUps = []) {
+        function streamBotResponse(fullMarkdown, sources = [], latency = 0.5, model = 'groq/compound-mini', chunksCount = 8, followUps = []) {
             const row = document.createElement('div');
             row.className = 'msg-row bot';
 
@@ -2329,7 +2580,7 @@
                         bubble.appendChild(tray);
                     }
 
-                    // Add Metrics & Action Row with AI Diagram Generator Button
+                    // Add Metrics & Action Row
                     const actions = document.createElement('div');
                     actions.className = 'msg-footer-actions';
                     actions.innerHTML = `
@@ -2338,9 +2589,6 @@
                         </button>
                         <button class="btn-msg-action" onclick="readAloud(this)">
                             🔊 <span>Read Aloud</span>
-                        </button>
-                        <button class="btn-msg-action" onclick="generateVisualDiagram(this)" title="Generate AI Diagram / Illustration for this concept">
-                            🎨 <span>Generate Diagram</span>
                         </button>
                         <div class="inference-badge">
                             <span>⚡ ${latency}s</span>
@@ -2377,96 +2625,7 @@
         }
 
         // ==========================================================================
-        // 6. AI Diagram & Image Generation Engine
-        // ==========================================================================
-        async function generateVisualDiagram(btn) {
-            const box = btn.closest('.msg-bubble-box');
-            const bubble = box.querySelector('.msg-bubble');
-            const text = bubble.innerText.replace(/📌 Citations:.*/s, '').trim();
-            const lines = text.split('\n').map(l => l.replace(/^[#\-*\d\.\s]+/, '').trim()).filter(l => l.length > 8);
-            const prompt = lines[0] ? lines[0].substring(0, 140) : 'cloud architecture and system components diagram';
-            await triggerImageGeneration(prompt);
-        }
-
-        async function triggerImageGeneration(prompt) {
-            if (isAnswering) return;
-            if (welcomeView && welcomeView.parentNode === chatScrollArea) {
-                welcomeView.remove();
-            }
-
-            appendUserBubble(`🎨 Generate Diagram / Visual: ${prompt}`);
-            isAnswering = true;
-            typingLoader.style.display = 'flex';
-            chatScrollArea.scrollTop = chatScrollArea.scrollHeight;
-
-            try {
-                const res = await fetch('/generate-image', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-                const data = await res.json();
-                typingLoader.style.display = 'none';
-
-                if (data.success && data.image_url) {
-                    appendGeneratedImageBubble(data.prompt, data.image_url);
-                } else {
-                    appendStaticBotBubble(`❌ **Image Generation Error:** ${data.error || 'Failed to generate visual.'}`);
-                }
-            } catch (err) {
-                typingLoader.style.display = 'none';
-                appendStaticBotBubble('❌ Network error while generating AI diagram.');
-            } finally {
-                isAnswering = false;
-                queryInput.focus();
-                chatScrollArea.scrollTop = chatScrollArea.scrollHeight;
-            }
-        }
-
-        function appendGeneratedImageBubble(prompt, imageUrl) {
-            const row = document.createElement('div');
-            row.className = 'msg-row bot';
-            row.innerHTML = `
-                <div class="msg-avatar">🎨</div>
-                <div class="msg-bubble-box">
-                    <div class="msg-bubble image-bubble">
-                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
-                            <span>✨</span> <span>AI Visual Diagram</span>
-                        </div>
-                        <div class="ai-generated-image-card">
-                            <img src="${imageUrl}" alt="${escapeHtml(prompt)}" class="ai-rendered-img" onclick="openImageLightbox('${imageUrl}')">
-                            <div class="ai-image-overlay">
-                                <a href="${imageUrl}" target="_blank" download="diagram-${Date.now()}.png" class="btn-download-img">
-                                    📥 Download Image
-                                </a>
-                            </div>
-                        </div>
-                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; font-weight: 500;">
-                            Concept: <em>${escapeHtml(prompt)}</em>
-                        </div>
-                    </div>
-                </div>
-            `;
-            chatScrollArea.appendChild(row);
-            chatScrollArea.scrollTop = chatScrollArea.scrollHeight;
-        }
-
-        function openImageLightbox(url) {
-            const box = document.getElementById('imageLightbox');
-            const img = document.getElementById('lightboxImg');
-            if (box && img) {
-                img.src = url;
-                box.style.display = 'flex';
-            }
-        }
-
-        function closeImageLightbox() {
-            const box = document.getElementById('imageLightbox');
-            if (box) box.style.display = 'none';
-        }
-
-        // ==========================================================================
-        // 7. Source Inspector Drawer
+        // 6. Source Inspector Drawer
         // ==========================================================================
         let currentDrawerSnippet = '';
         let currentDrawerFile = '';
@@ -2511,7 +2670,7 @@
         });
 
         // ==========================================================================
-        // 8. Voice Dictation (Speech-to-Text) & Voice Synthesis (TTS)
+        // 7. Voice Dictation (Web Speech API) & Audio Read-Aloud (TTS)
         // ==========================================================================
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2531,7 +2690,7 @@
                 recognition.onerror = () => stopRecording();
                 recognition.onend = () => stopRecording();
             } else {
-                if (micBtn) micBtn.style.display = 'none';
+                micBtn.style.display = 'none';
             }
         }
 
@@ -2555,52 +2714,48 @@
 
         function stopRecording() {
             isRecording = false;
-            if (micBtn) {
-                micBtn.classList.remove('recording');
-                micBtn.title = 'Voice Dictation (Speech-to-Text)';
-            }
+            micBtn.classList.remove('recording');
+            micBtn.title = 'Voice Dictation (Speech-to-Text)';
         }
 
         let activeAudio = null;
         let activeAudioBtn = null;
 
         async function readAloud(btn) {
-            const bubble = btn.closest('.msg-bubble-box').querySelector('.msg-bubble');
-            const textToRead = bubble.innerText.replace(/📌 Citations:.*/s, '').trim();
-
-            if (activeAudio && activeAudioBtn === btn) {
+            // If already playing audio on this or another message, stop it
+            if (activeAudio && !activeAudio.paused) {
                 activeAudio.pause();
-                activeAudio = null;
-                activeAudioBtn = null;
-                btn.innerHTML = '🔊 <span>Read Aloud</span>';
-                return;
-            }
-
-            if (activeAudio) {
-                activeAudio.pause();
+                activeAudio.currentTime = 0;
                 if (activeAudioBtn) activeAudioBtn.innerHTML = '🔊 <span>Read Aloud</span>';
+                if (activeAudioBtn === btn) {
+                    activeAudio = null;
+                    activeAudioBtn = null;
+                    return;
+                }
             }
+
+            const bubble = btn.closest('.msg-bubble-box').querySelector('.msg-bubble');
+            const rawText = bubble.innerText;
+            // Clean citations and follow-up texts from speech string
+            const textToRead = rawText.replace(/📌 Citations:[\s\S]*/, '').replace(/💡 Suggested Follow-ups:[\s\S]*/, '').trim();
+            const voice = localStorage.getItem('cognipdf_voice') || 'en-US-AriaNeural';
 
             btn.innerHTML = '⏳ <span>Synthesizing...</span>';
             activeAudioBtn = btn;
 
-            const selectedVoice = localStorage.getItem('cognipdf_voice') || 'en-US-AriaNeural';
-
             try {
-                const response = await fetch('/tts', {
+                const res = await fetch('/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: textToRead, voice: selectedVoice })
+                    body: JSON.stringify({ text: textToRead, voice })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`TTS server returned status ${response.status}`);
-                }
+                if (!res.ok) throw new Error('Server TTS returned error');
 
-                const audioBlob = await response.blob();
+                const audioBlob = await res.blob();
                 const audioUrl = URL.createObjectURL(audioBlob);
-
                 activeAudio = new Audio(audioUrl);
+
                 btn.innerHTML = '⏹️ <span>Stop Audio</span>';
                 activeAudio.play();
 
@@ -2648,7 +2803,7 @@
         }
 
         // ==========================================================================
-        // 9. Export Conversation Suite
+        // 8. Export Conversation Suite
         // ==========================================================================
         function exportConversation() {
             if (!conversationLog || conversationLog.length === 0) {
@@ -2694,51 +2849,36 @@
         }
 
         // ==========================================================================
-        // 10. Settings Modal Handlers
+        // 9. Settings Modal Handlers
         // ==========================================================================
-        function openConfigModal() {
-            const modal = document.getElementById('configModal');
-            if (modal) {
-                modal.style.display = 'flex';
-            }
+        async function openConfigModal() {
+            try {
+                const res = await fetch('/config');
+                const data = await res.json();
+                if (data.has_groq_key && data.masked_key) {
+                    document.getElementById('apiKeyInput').placeholder = `Configured (${data.masked_key})`;
+                }
+                if (data.has_elevenlabs_key && data.masked_elevenlabs_key) {
+                    document.getElementById('elevenLabsApiKeyInput').placeholder = `Configured (${data.masked_elevenlabs_key})`;
+                }
+                if (data.current_model) {
+                    selectedModel = data.current_model;
+                    document.getElementById('modelSelectMenu').value = data.current_model;
+                }
+            } catch (e) {}
 
             const savedVoice = localStorage.getItem('cognipdf_voice') || 'en-US-AriaNeural';
             const voiceSelect = document.getElementById('voiceSelectMenu');
             if (voiceSelect) voiceSelect.value = savedVoice;
-
-            fetch('/config')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.has_gemini_key && data.masked_gemini_key) {
-                        const g = document.getElementById('geminiApiKeyInput');
-                        if (g) g.placeholder = `Configured (${data.masked_gemini_key})`;
-                    }
-                    if (data.has_groq_key && data.masked_key) {
-                        const k = document.getElementById('apiKeyInput');
-                        if (k) k.placeholder = `Configured (${data.masked_key})`;
-                    }
-                    if (data.has_elevenlabs_key && data.masked_elevenlabs_key) {
-                        const el = document.getElementById('elevenLabsApiKeyInput');
-                        if (el) el.placeholder = `Configured (${data.masked_elevenlabs_key})`;
-                    }
-                    if (data.current_model) {
-                        selectedModel = data.current_model;
-                        const m = document.getElementById('modelSelectMenu');
-                        if (m) m.value = data.current_model;
-                    }
-                })
-                .catch(e => console.warn('Config fetch error:', e));
+            
+            configModal.style.display = 'flex';
         }
 
-        function closeConfigModal(e) {
-            if (!e || e.target.id === 'configModal' || (e.target && e.target.className === 'btn-close-x') || (e.target && e.target.textContent === 'Cancel')) {
-                const modal = document.getElementById('configModal');
-                if (modal) modal.style.display = 'none';
-            }
+        function closeConfigModal() {
+            configModal.style.display = 'none';
         }
 
         async function saveConfiguration() {
-            const geminiKey = document.getElementById('geminiApiKeyInput').value.trim();
             const key = document.getElementById('apiKeyInput').value.trim();
             const elKey = document.getElementById('elevenLabsApiKeyInput').value.trim();
             const model = document.getElementById('modelSelectMenu').value;
@@ -2752,7 +2892,7 @@
                 const res = await fetch('/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ gemini_api_key: geminiKey, groq_api_key: key, model, elevenlabs_api_key: elKey })
+                    body: JSON.stringify({ groq_api_key: key, model, elevenlabs_api_key: elKey })
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -2818,6 +2958,15 @@
                 }
             }
         }
+
+        // Global ESC Listener for Drawers, Modals & Mobile Sidebar
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleSidebar(false);
+                closeSourceDrawer();
+                closeConfigModal();
+            }
+        });
     </script>
 </body>
 </html>
