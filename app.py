@@ -620,6 +620,42 @@ Answer:""",
         print(f"Error during question answering: {str(e)}")
         return jsonify({'success': False, 'error': f"An error occurred: {str(e)}"})
 
+def rebuild_vector_store():
+    global vector_store, current_files
+    try:
+        if not current_files:
+            vector_store = None
+            return True
+
+        all_docs = []
+        for f in current_files:
+            fpath = os.path.join(app.config['UPLOAD_FOLDER'], f['name'])
+            if os.path.exists(fpath):
+                docs, _ = extract_pdf_documents(fpath, f['name'])
+                if docs:
+                    all_docs.extend(docs)
+
+        if not all_docs:
+            vector_store = None
+            return True
+
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            separators=["\n\n", "\n", ". ", " ", ""]
+        )
+        chunks = splitter.split_documents(all_docs)
+        if chunks:
+            emb, _ = get_embeddings()
+            vector_store = Chroma.from_documents(chunks, emb)
+        else:
+            vector_store = None
+        return True
+    except Exception as e:
+        print(f"Error rebuilding vector store: {e}")
+        vector_store = None
+        return False
+
 @app.route('/delete-file', methods=['POST'])
 def delete_file():
     global current_files
@@ -629,26 +665,43 @@ def delete_file():
     if not filename:
         return jsonify({'success': False, 'error': 'No filename provided.'})
         
-    matching = [f for f in current_files if f['name'] == filename]
-    if not matching:
-        return jsonify({'success': False, 'error': f"File '{filename}' not found."})
-        
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if os.path.exists(file_path):
-        try:
-            os.remove(file_path)
-        except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
+    with state_lock:
+        matching = [f for f in current_files if f.get('name') == filename or f.get('display_name') == filename]
+        if not matching:
+            # Check if file exists on disk anyway
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except Exception:
+                    pass
+            current_files = [f for f in current_files if f.get('name') != filename and f.get('display_name') != filename]
+            rebuild_vector_store()
+            return jsonify({
+                'success': True,
+                'message': f"File '{filename}' removed.",
+                'total_files': len(current_files),
+                'all_files': current_files
+            })
             
-    current_files = [f for f in current_files if f['name'] != filename]
-    rebuild_vector_store()
-    
-    return jsonify({
-        'success': True,
-        'message': f"File '{filename}' deleted successfully.",
-        'total_files': len(current_files),
-        'all_files': current_files
-    })
+        target = matching[0]
+        actual_name = target['name']
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], actual_name)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+                
+        current_files = [f for f in current_files if f.get('name') != actual_name and f.get('display_name') != actual_name]
+        rebuild_vector_store()
+        
+        return jsonify({
+            'success': True,
+            'message': f"File '{filename}' deleted successfully.",
+            'total_files': len(current_files),
+            'all_files': current_files
+        })
 
 @app.route('/clear-history', methods=['POST'])
 def clear_history():
@@ -660,28 +713,34 @@ def clear_history():
 def clear_all():
     global current_files, vector_store, history
     
-    try:
-        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            try:
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-            except Exception:
-                pass
-                
-        if vector_store is not None:
-            try:
-                vector_store.delete_collection()
-            except Exception:
-                pass
-                
-        current_files = []
-        vector_store = None
-        history = []
-        
-        return jsonify({'success': True, 'message': 'All documents and chat session cleared.'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    with state_lock:
+        try:
+            if os.path.exists(app.config['UPLOAD_FOLDER']):
+                for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.remove(file_path)
+                    except Exception:
+                        pass
+                    
+            if vector_store is not None:
+                try:
+                    vector_store.delete_collection()
+                except Exception:
+                    pass
+                    
+            current_files = []
+            vector_store = None
+            history = []
+            
+            return jsonify({
+                'success': True, 
+                'message': 'All documents and vector store cleared successfully.',
+                'all_files': []
+            })
+        except Exception as e:
+            return jsonify({'success': False, 'error': f"Failed to clear documents: {str(e)}"})
 
 def get_elevenlabs_api_key():
     key = os.getenv('ELEVENLABS_API_KEY', '').strip()

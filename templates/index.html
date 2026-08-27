@@ -2585,22 +2585,36 @@
                 const card = document.createElement('div');
                 card.className = 'doc-card';
                 const displayName = doc.display_name || doc.name;
-                card.innerHTML = `
-                    <div class="doc-meta-group">
-                        <div class="doc-badge-icon">📄</div>
-                        <div class="doc-info-text">
-                            <div class="doc-title" title="${displayName}">${displayName}</div>
-                            <div class="doc-submeta">
-                                <span>${doc.pages || '?'} pages</span>
-                                <span>•</span>
-                                <span>${doc.chunks || '?'} chunks</span>
-                                <span>•</span>
-                                <span>${doc.size || ''}</span>
-                            </div>
+                
+                const metaGroup = document.createElement('div');
+                metaGroup.className = 'doc-meta-group';
+                metaGroup.innerHTML = `
+                    <div class="doc-badge-icon">📄</div>
+                    <div class="doc-info-text">
+                        <div class="doc-title" title="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>
+                        <div class="doc-submeta">
+                            <span>${doc.pages || '?'} pages</span>
+                            <span>•</span>
+                            <span>${doc.chunks || '?'} chunks</span>
+                            <span>•</span>
+                            <span>${doc.size || ''}</span>
                         </div>
                     </div>
-                    <button class="btn-del-doc" onclick="removeSingleDoc('${doc.name}')" title="Remove Document">✕</button>
                 `;
+                card.appendChild(metaGroup);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-del-doc';
+                delBtn.textContent = '✕';
+                delBtn.title = 'Remove Document';
+                delBtn.type = 'button';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    removeSingleDoc(doc.name);
+                });
+                card.appendChild(delBtn);
+
                 docList.appendChild(card);
             });
         }
@@ -2616,7 +2630,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    registeredDocs = data.all_files;
+                    registeredDocs = data.all_files || [];
                     renderDocumentList();
                     triggerToast('Document removed', 'info');
                 } else {
