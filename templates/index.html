@@ -1511,10 +1511,10 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            z-index: 80;
+            z-index: 9998;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1524,6 +1524,107 @@
             display: block;
             opacity: 1;
             pointer-events: auto;
+        }
+
+        /* Universal Upload Progress Modal */
+        .upload-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 100000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: modalFadeIn 0.25s ease;
+        }
+
+        .upload-modal-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .upload-spin-icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: spinGear 3s linear infinite;
+        }
+
+        @keyframes spinGear {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .welcome-upload-banner {
+            width: 100%;
+            max-width: 520px;
+            margin: 16px 0 22px;
+            background: var(--accent-gradient-subtle);
+            border: 2px dashed rgba(99, 102, 241, 0.45);
+            border-radius: 18px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .welcome-upload-banner:hover {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.14);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .welcome-upload-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            box-shadow: var(--shadow-glow);
+            flex-shrink: 0;
+        }
+
+        .welcome-upload-text {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .welcome-upload-text strong {
+            font-size: 0.96rem;
+            color: var(--text-primary);
+        }
+
+        .welcome-upload-text span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .btn-attach-pdf {
+            color: var(--accent-primary) !important;
+            font-size: 1.15rem !important;
         }
 
         /* Large Tablets & Small Laptops (<= 1024px) */
@@ -1550,17 +1651,21 @@
                 width: 360px;
                 max-width: 86vw;
                 height: 100dvh;
-                background: var(--bg-canvas);
-                z-index: 90;
+                background: var(--bg-card);
+                backdrop-filter: blur(28px);
+                -webkit-backdrop-filter: blur(28px);
+                z-index: 9999;
                 padding: 16px;
                 overflow-y: auto;
                 transform: translateX(-105%);
-                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                visibility: hidden;
+                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
                 box-shadow: var(--shadow-lg);
             }
 
             .sidebar.open {
                 transform: translateX(0);
+                visibility: visible;
             }
 
             .mobile-sidebar-close {
@@ -1941,6 +2046,16 @@
                     <h3>Ask Anything Across Your Documents</h3>
                     <p>Upload your research papers, whitepapers, or manuals to extract insights, compare information, and query complex topics with exact source citations.</p>
                     
+                    <!-- Direct Upload PDF Card (Directly visible on Mobile, Tablet & Desktop) -->
+                    <div class="welcome-upload-banner" onclick="document.getElementById('fileInput').click()" title="Click to Upload PDF Document">
+                        <div class="welcome-upload-icon">📄</div>
+                        <div class="welcome-upload-text">
+                            <strong>Tap to Upload PDF Documents</strong>
+                            <span>Fast vectorization, OCR text extraction, & instant citations</span>
+                        </div>
+                        <button type="button" class="btn-action-primary" style="padding: 8px 16px; font-size: 0.84rem; flex-shrink:0;">Browse</button>
+                    </div>
+
                     <div class="prompt-grid">
                         <div class="prompt-chip" onclick="submitQuickPrompt('Provide a comprehensive executive summary of the uploaded document(s).')">
                             <div class="prompt-chip-icon">📝</div>
@@ -1974,6 +2089,10 @@
             <div class="chat-footer-bar">
                 <form id="queryForm" onsubmit="onChatSubmit(event)">
                     <div class="chat-input-pill">
+                        <!-- Quick Attach PDF Button -->
+                        <button type="button" class="btn-input-icon btn-attach-pdf" onclick="document.getElementById('fileInput').click()" title="Attach / Upload PDF Document" aria-label="Upload PDF">
+                            📎
+                        </button>
                         <input 
                             type="text" 
                             class="main-chat-input" 
@@ -2090,6 +2209,18 @@
             <div class="modal-foot">
                 <button class="btn-action-cancel" onclick="closeConfigModal()">Cancel</button>
                 <button class="btn-action-primary" onclick="saveConfiguration()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Upload Progress Overlay (Works on Mobile, Tablet & Desktop) -->
+    <div class="upload-modal-overlay" id="uploadModalOverlay">
+        <div class="upload-modal-card">
+            <div class="upload-spin-icon">⚡</div>
+            <h3 id="uploadModalTitle" style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary);">Indexing Document(s)...</h3>
+            <p id="uploadModalSub" style="font-size: 0.85rem; color: var(--text-secondary); margin: 6px 0 16px;">Extracting text, running OCR if needed & vectorizing...</p>
+            <div class="progress-bar-container" style="display: block; width: 100%;">
+                <div class="progress-bar-fill" id="uploadModalProgressFill" style="width: 30%;"></div>
             </div>
         </div>
     </div>
@@ -2262,6 +2393,19 @@
                 return;
             }
 
+            // Universal Upload Modal Elements
+            const uploadModal = document.getElementById('uploadModalOverlay');
+            const uploadTitle = document.getElementById('uploadModalTitle');
+            const uploadSub = document.getElementById('uploadModalSub');
+            const uploadProgressFill = document.getElementById('uploadModalProgressFill');
+
+            if (uploadModal) {
+                uploadModal.style.display = 'flex';
+                if (uploadTitle) uploadTitle.textContent = `Indexing ${pdfFiles.length} PDF(s)...`;
+                if (uploadSub) uploadSub.textContent = 'Extracting text, running OCR if needed & vectorizing...';
+                if (uploadProgressFill) uploadProgressFill.style.width = '15%';
+            }
+
             dropzoneBox.classList.add('uploading');
             document.getElementById('dropzoneTitle').textContent = `Indexing ${pdfFiles.length} PDF(s)...`;
             document.getElementById('dropzoneSub').textContent = 'Extracting text, running OCR if needed & vectorizing...';
@@ -2273,7 +2417,11 @@
                 const file = pdfFiles[i];
                 const formData = new FormData();
                 formData.append('file', file);
-                progressBarFill.style.width = `${Math.round(((i + 0.5) / pdfFiles.length) * 90)}%`;
+                
+                const percent = Math.round(((i + 0.5) / pdfFiles.length) * 90);
+                progressBarFill.style.width = `${percent}%`;
+                if (uploadProgressFill) uploadProgressFill.style.width = `${percent}%`;
+                if (uploadSub) uploadSub.textContent = `Processing "${file.name}" (${i + 1}/${pdfFiles.length})...`;
 
                 try {
                     const res = await fetch('/upload', {
@@ -2294,15 +2442,25 @@
             }
 
             progressBarFill.style.width = '100%';
+            if (uploadProgressFill) uploadProgressFill.style.width = '100%';
+            if (uploadSub) uploadSub.textContent = 'Vector indexing complete!';
+
             setTimeout(() => {
                 progressBarContainer.style.display = 'none';
                 progressBarFill.style.width = '0%';
+                if (uploadModal) uploadModal.style.display = 'none';
+                if (uploadProgressFill) uploadProgressFill.style.width = '0%';
             }, 600);
 
             dropzoneBox.classList.remove('uploading');
             document.getElementById('dropzoneTitle').textContent = 'Upload PDF Documents';
             document.getElementById('dropzoneSub').textContent = 'Drag & drop files or click to browse';
             fileInput.value = '';
+
+            // If sidebar was open on mobile, close it smoothly
+            if (window.innerWidth <= 1024) {
+                toggleSidebar(false);
+            }
 
             if (successfulUploads > 0) {
                 triggerToast(`Successfully indexed ${successfulUploads} document(s)!`, 'success');
