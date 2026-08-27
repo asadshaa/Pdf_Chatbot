@@ -25,10 +25,10 @@
             --aurora-4: rgba(168, 85, 247, 0.38);
             --mouse-glow: rgba(99, 102, 241, 0.30);
 
-            --bg-navbar: rgba(255, 255, 255, 0.85);
-            --bg-card: rgba(255, 255, 255, 0.78);
-            --bg-card-hover: rgba(255, 255, 255, 0.96);
-            --bg-tertiary: rgba(241, 245, 249, 0.85);
+            --bg-navbar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8fafc;
+            --bg-tertiary: #f1f5f9;
             --bg-input: #ffffff;
 
             --border-color: rgba(203, 213, 225, 0.9);
@@ -48,7 +48,7 @@
 
             --user-bubble-bg: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
             --user-bubble-text: #ffffff;
-            --bot-bubble-bg: rgba(255, 255, 255, 0.94);
+            --bot-bubble-bg: #ffffff;
             --bot-bubble-border: rgba(203, 213, 225, 0.95);
             --bot-bubble-text: #0f172a;
 
@@ -78,9 +78,9 @@
             --aurora-4: rgba(168, 85, 247, 0.30);
             --mouse-glow: rgba(99, 102, 241, 0.22);
 
-            --bg-navbar: rgba(11, 15, 25, 0.85);
-            --bg-card: rgba(17, 24, 39, 0.78);
-            --bg-card-hover: rgba(31, 41, 55, 0.92);
+            --bg-navbar: #0b0f19;
+            --bg-card: #111827;
+            --bg-card-hover: #1f2937;
             --bg-tertiary: #1e293b;
             --bg-input: #111827;
 
@@ -161,11 +161,8 @@
             pointer-events: none;
             z-index: 0;
             overflow: hidden;
-            filter: blur(55px);
-            opacity: 0.92;
+            opacity: 0.75;
             transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
-            perspective: 1000px;
         }
 
         .aurora-orb {
@@ -436,8 +433,6 @@
 
         .glass-panel {
             background: var(--bg-card);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
             border: 1px solid var(--border-color);
             border-radius: 22px;
             box-shadow: var(--shadow-md);
@@ -1627,54 +1622,127 @@
             font-size: 1.15rem !important;
         }
 
-        /* Large Tablets & Small Laptops (<= 1024px) */
+        /* ==========================================================================
+           Mobile & Tablet Segmented Tab Bar Navigation
+           ========================================================================== */
+        .mobile-tab-nav {
+            display: none;
+            padding: 8px 16px;
+            background: var(--bg-navbar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 60px;
+            z-index: 50;
+        }
+
+        .mobile-tab-pill-box {
+            display: flex;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 4px;
+            gap: 6px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .mobile-tab-item {
+            flex: 1;
+            padding: 9px 16px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mobile-tab-item.active {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Large Tablets, Small Laptops & Mobile (<= 1024px) */
         @media (max-width: 1024px) {
             .navbar {
-                padding: 12px 18px;
+                padding: 12px 16px;
             }
 
-            .btn-mobile-docs {
-                display: inline-flex;
+            .mobile-tab-nav {
+                display: block;
+            }
+
+            .mouse-spotlight {
+                display: none !important;
             }
 
             .main-container {
-                grid-template-columns: 1fr;
-                padding: 12px 16px;
+                display: block;
+                padding: 12px 14px;
+                max-width: 100%;
+                gap: 0;
+            }
+
+            /* Tab Visibility Control */
+            body[data-mobile-tab="chat"] .sidebar {
+                display: none !important;
+            }
+
+            body[data-mobile-tab="chat"] .chat-container {
+                display: flex !important;
+                width: 100% !important;
+                height: calc(100dvh - 135px);
+                min-height: 480px;
+            }
+
+            body[data-mobile-tab="docs"] .sidebar {
+                display: flex !important;
+                width: 100% !important;
+                position: static !important;
+                transform: none !important;
+                visibility: visible !important;
+                box-shadow: none !important;
+                padding: 0 !important;
                 gap: 16px;
-                height: auto;
+            }
+
+            body[data-mobile-tab="docs"] .chat-container {
+                display: none !important;
+            }
+        }
+
+        /* Desktop Layout (>= 1025px) */
+        @media (min-width: 1025px) {
+            .mobile-tab-nav {
+                display: none !important;
+            }
+
+            .main-container {
+                display: grid !important;
+                grid-template-columns: 360px 1fr !important;
+                padding: 24px 32px;
+                gap: 24px;
             }
 
             .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 360px;
-                max-width: 86vw;
-                height: 100dvh;
-                background: var(--bg-card);
-                backdrop-filter: blur(28px);
-                -webkit-backdrop-filter: blur(28px);
-                z-index: 9999;
-                padding: 16px;
-                overflow-y: auto;
-                transform: translateX(-105%);
-                visibility: hidden;
-                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
-                box-shadow: var(--shadow-lg);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-                visibility: visible;
-            }
-
-            .mobile-sidebar-close {
-                display: inline-flex;
+                display: flex !important;
+                width: 100% !important;
+                position: static !important;
+                transform: none !important;
+                visibility: visible !important;
             }
 
             .chat-container {
-                height: calc(100dvh - 84px);
-                min-height: 540px;
+                display: flex !important;
+                height: calc(100vh - 120px);
+                min-height: 600px;
             }
         }
 
@@ -1917,11 +1985,6 @@
     <!-- Top Sticky Navbar -->
     <header class="navbar">
         <div class="brand">
-            <!-- Mobile Document Hub Drawer Button (Visible on < 1024px) -->
-            <button class="btn-nav-action btn-mobile-docs" id="mobileDocsToggleBtn" onclick="toggleSidebar(true)" title="Open Documents Hub" aria-label="Toggle Document Hub">
-                📁 <span class="nav-label">Docs</span>
-                <span class="mobile-doc-badge" id="mobileDocCount">0</span>
-            </button>
             <div class="brand-icon-box">📚</div>
             <div class="brand-text">
                 <h1>CogniPDF AI</h1>
@@ -1958,8 +2021,17 @@
         </div>
     </header>
 
-    <!-- Mobile Sidebar Backdrop -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar(false)"></div>
+    <!-- Mobile Segmented View Tab Navigation (Active on Mobile & Tablets <= 1024px) -->
+    <nav class="mobile-tab-nav" id="mobileTabNav">
+        <div class="mobile-tab-pill-box">
+            <button class="mobile-tab-item active" id="tabItemChat" onclick="switchMobileTab('chat')" type="button">
+                <span>💬</span> <span>Research Chat</span>
+            </button>
+            <button class="mobile-tab-item" id="tabItemDocs" onclick="switchMobileTab('docs')" type="button">
+                <span>📄</span> <span>Documents (<span id="mobileTabDocCount">0</span>)</span>
+            </button>
+        </div>
+    </nav>
 
     <!-- Main Workspace -->
     <main class="main-container">
@@ -1971,10 +2043,7 @@
                         <span>📄</span>
                         <span>Document Hub</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn-clear-all" id="clearAllBtn" style="display: none;" onclick="clearAllDocs()">Clear All</button>
-                        <button class="btn-close-x mobile-sidebar-close" onclick="toggleSidebar(false)" title="Close Sidebar">&times;</button>
-                    </div>
+                    <button class="btn-clear-all" id="clearAllBtn" style="display: none;" onclick="clearAllDocs()">Clear All</button>
                 </div>
                 
                 <div class="panel-body">
@@ -2311,6 +2380,7 @@
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
+            switchMobileTab('chat');
             refreshStatus();
             bindDropzoneEvents();
             initSpeechRecognition();
@@ -2338,13 +2408,14 @@
                 embPillText.textContent = 'Local MiniLM + OCR';
                 activeModelLabel.textContent = selectedModel;
                 
-                if (data.supported_models && data.supported_models.length > 0) {
+                // Populate dynamic model menu if available
+                if (data.available_models && data.available_models.length > 0) {
                     modelSelectMenu.innerHTML = '';
-                    data.supported_models.forEach(m => {
+                    data.available_models.forEach(m => {
                         const opt = document.createElement('option');
-                        opt.value = m;
-                        opt.textContent = m;
-                        if (m === selectedModel) opt.selected = true;
+                        opt.value = m.id;
+                        opt.textContent = `${m.id} (${m.context_window} tokens)`;
+                        if (m.id === selectedModel) opt.selected = true;
                         modelSelectMenu.appendChild(opt);
                     });
                 }
@@ -2457,50 +2528,40 @@
             document.getElementById('dropzoneSub').textContent = 'Drag & drop files or click to browse';
             fileInput.value = '';
 
-            // If sidebar was open on mobile, close it smoothly
-            if (window.innerWidth <= 1024) {
-                toggleSidebar(false);
-            }
-
             if (successfulUploads > 0) {
                 triggerToast(`Successfully indexed ${successfulUploads} document(s)!`, 'success');
+                switchMobileTab('chat');
                 queryInput.focus();
             }
         }
 
         // ==========================================================================
-        // Mobile Sidebar Drawer Controller
+        // Mobile & Tablet Segmented Tab View Controller
         // ==========================================================================
-        function toggleSidebar(show) {
-            const sidebar = document.getElementById('appSidebar');
-            const backdrop = document.getElementById('sidebarBackdrop');
-            if (!sidebar || !backdrop) return;
+        function switchMobileTab(tab) {
+            document.body.setAttribute('data-mobile-tab', tab);
+            const btnChat = document.getElementById('tabItemChat');
+            const btnDocs = document.getElementById('tabItemDocs');
             
-            if (typeof show === 'boolean') {
-                if (show) {
-                    sidebar.classList.add('open');
-                    backdrop.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    sidebar.classList.remove('open');
-                    backdrop.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
+            if (tab === 'chat') {
+                if (btnChat) btnChat.classList.add('active');
+                if (btnDocs) btnDocs.classList.remove('active');
             } else {
-                const isOpen = sidebar.classList.contains('open');
-                toggleSidebar(!isOpen);
+                if (btnChat) btnChat.classList.remove('active');
+                if (btnDocs) btnDocs.classList.add('active');
             }
         }
 
+
         function renderDocumentList() {
             docList.innerHTML = '';
-            const mobileDocCount = document.getElementById('mobileDocCount');
+            const mobileTabDocCount = document.getElementById('mobileTabDocCount');
             
             if (!registeredDocs || registeredDocs.length === 0) {
                 docList.appendChild(emptyDocsState);
                 clearAllBtn.style.display = 'none';
                 activeDocCountBadge.textContent = '0 Documents';
-                if (mobileDocCount) mobileDocCount.textContent = '0';
+                if (mobileTabDocCount) mobileTabDocCount.textContent = '0';
                 indexStatsLabel.textContent = 'Awaiting PDFs';
                 indexStatsLabel.style.color = 'var(--text-muted)';
                 return;
@@ -2508,7 +2569,7 @@
 
             clearAllBtn.style.display = 'block';
             activeDocCountBadge.textContent = `${registeredDocs.length} Document${registeredDocs.length > 1 ? 's' : ''}`;
-            if (mobileDocCount) mobileDocCount.textContent = `${registeredDocs.length}`;
+            if (mobileTabDocCount) mobileTabDocCount.textContent = `${registeredDocs.length}`;
             
             const totalPages = registeredDocs.reduce((acc, doc) => acc + (doc.pages || 0), 0);
             const totalChunks = registeredDocs.reduce((acc, doc) => acc + (doc.chunks || 0), 0);
